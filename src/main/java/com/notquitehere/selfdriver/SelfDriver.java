@@ -7,73 +7,82 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-import static com.notquitehere.selfdriver.DriveMode.NORMAL;
-import static com.notquitehere.selfdriver.DriveMode.SAFE;
-import static com.notquitehere.selfdriver.DriveMode.SPORT;
+import static com.notquitehere.selfdriver.DriveMode.*;
 import static com.notquitehere.selfdriver.SensorType.*;
 import static com.notquitehere.selfdriver.SpeedLimit.forceFit;
-import static com.notquitehere.selfdriver.util.Result.failure;
 import static com.notquitehere.selfdriver.util.Result.success;
 
 public class SelfDriver {
-    public final DriveMode mode;
-    private int speed = 20;
-    private boolean inTraffic = false;
-    private boolean inRain = false;
-    private boolean onSlipperyRoad = false;
+    private DriverState state;
+
+    public static final int STARTING_SPEED = 20;
     public static final int MIN_SPEED = 10;
 
     public boolean isInTraffic() {
-        return inTraffic;
+        return state.inTraffic;
     }
 
     public void setInTraffic(boolean inTraffic) {
-        this.inTraffic = inTraffic;
+        state = state.setTraffic(inTraffic);
     }
 
     public boolean isInRain() {
-        return inRain;
+        return state.inRain;
     }
 
     public void setInRain(boolean inRain) {
-        this.inRain = inRain;
+        state.setRain(inRain);
     }
 
     public boolean isOnSlipperyRoad() {
-        return onSlipperyRoad;
+        return state.onSlipperyRoad;
     }
 
     public void setOnSlipperyRoad(boolean onSlipperyRoad) {
-        this.onSlipperyRoad = onSlipperyRoad;
+        state.setSlipperyRoad(onSlipperyRoad);
     }
 
-    public int getSpeed() {
-        return speed;
+    public boolean turboIsOn() {
+        return state.turboOn;
+    }
+
+    public int turboUseCount(){
+        return state.turboUseCount;
     }
 
     public void setSpeed(int speed) {
-        this.speed = forceFit(speed);
+        state = state.setSpeed(forceFit(speed));
     }
 
     public void adjustSpeed(int delta){
-        speed = forceFit(Math.max(speed + delta, MIN_SPEED));
+        state = state.setSpeed(
+            forceFit(Math.max(state.speed + delta, MIN_SPEED)));
+    }
+
+    public int speed() {
+        return state.speed;
     }
 
     public static final Map<DriveMode, Map<SensorType, Integer>>
-        SPEEDMAPS_BY_DRIVE_MODE;
+        speedMapsByDriveMode;
+
     private static final Map<SensorType, Action> actionsByType;
 
     static {
-        SPEEDMAPS_BY_DRIVE_MODE = new HashMap<>();
+        speedMapsByDriveMode = new HashMap<>();
         buildSpeedMaps();
         actionsByType = new HashMap<>();
         actionsByType.put(TRAFFIC, SelfDriver::handleTraffic);
+        actionsByType.put(TRAFFIC_CLEAR, SelfDriver::handleTrafficClear);
         actionsByType.put(SPEED_LIMIT_SIGN, SelfDriver::handleSpeedLimit);
+        actionsByType.put(EMERGENCY_TURBO, SelfDriver::handleTurbo);
 
     }
 
     public SelfDriver(DriveMode mode) {
-        this.mode = mode;
+        state = new DriverState(
+            mode, STARTING_SPEED, false, false, false, false,
+            0);
     }
 
     public Result<Void> handleSensorEvent(SensorEvent event) {
@@ -81,13 +90,14 @@ public class SelfDriver {
         return action.apply(this, event);
     }
 
-    public int speed() {
-        return speed;
-    }
-
     private static Result<Void> handleTraffic(SelfDriver sd, SensorEvent e) {
         sd.setInTraffic(true);
         sd.adjustSpeed(getDelta(sd, TRAFFIC));
+        return success();
+    }
+
+    private static Result<Void> handleTrafficClear(SelfDriver sd, SensorEvent e){
+        sd.adjustSpeed(getDelta(sd, TRAFFIC_CLEAR));
         return success();
     }
 
@@ -97,13 +107,24 @@ public class SelfDriver {
         return success();
     }
 
+    private static Result<Void> handleTurbo(SelfDriver sd, SensorEvent e) {
+        if (sd.turboUseCount() == 0) {
+            sd.startTurbo(getDelta(sd, EMERGENCY_TURBO));
+        }
+        return success();
+    }
+
+    private void startTurbo(Integer speedDelta) {
+        state = state.setTurbo(true, state.speed + speedDelta);
+    }
+
     private static Integer getDelta(SelfDriver sd, SensorType sensorType) {
-        return SPEEDMAPS_BY_DRIVE_MODE.get(sd.mode).get(sensorType);
+        return speedMapsByDriveMode.get(sd.state.mode).get(sensorType);
     }
 
     //todo load from files, env vars, DB or ...
     private static void buildSpeedMaps() {
-        SPEEDMAPS_BY_DRIVE_MODE.put(
+        speedMapsByDriveMode.put(
             NORMAL,
             new UnmodifiableMapBuilder<SensorType, Integer>()
                 .add(TRAFFIC, -10)
@@ -116,7 +137,7 @@ public class SelfDriver {
                 .add(SPEED_LIMIT_SIGN, 0)
                 .build()
         );
-        SPEEDMAPS_BY_DRIVE_MODE.put(
+        speedMapsByDriveMode.put(
             SPORT,
             new UnmodifiableMapBuilder<SensorType, Integer>()
                 .add(TRAFFIC, -5)
@@ -129,7 +150,7 @@ public class SelfDriver {
                 .add(SPEED_LIMIT_SIGN, 5)
                 .build()
         );
-        SPEEDMAPS_BY_DRIVE_MODE.put(
+        speedMapsByDriveMode.put(
             SAFE,
             new UnmodifiableMapBuilder<SensorType, Integer>()
                 .add(TRAFFIC, -15)
