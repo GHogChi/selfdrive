@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Built-By: tomcat
+Class-Path: commons-lang3-3.7.jar plexus-utils-3.1.0.jar mockito-core-
+ 2.15.0.jar byte-buddy-1.7.9.jar byte-buddy-agent-1.7.9.jar objenesis-
+ 2.6.jar
+Created-By: Apache Maven 3.3.9
+Build-Jdk: 1.8.0_101
+Main-Class: com.notquitehere.selfdriver.CommandLine
+

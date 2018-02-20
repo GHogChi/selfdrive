@@ -1,9 +1,11 @@
 package com.notquitehere.selfdriver;
 
 import com.notquitehere.selfdriver.util.Result;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.notquitehere.selfdriver.DriveMode.*;
 import static com.notquitehere.selfdriver.ExpectInvalid.expectInvalid;
@@ -24,13 +26,28 @@ public class WhenSelfDriverIsStarted {
     }
 
     @Test
-    public void trafficEventCausesSpeedChange() {
-        SensorEvent[] events = {SensorEvent.createSimple(TRAFFIC)};
+    public void trafficEventsCauseSpeedChanges() {
+        SensorEvent[] events = {
+            create(SPEED_LIMIT_SIGN, limit(50)),
+            createSimple(TRAFFIC),
+            createSimple(TRAFFIC_CLEAR)
+        };
 
-        verifyFinalSpeed(NORMAL, events, 10);
-        verifyFinalSpeed(SPORT, events, 15);
-        verifyFinalSpeed(SAFE, events, 10);
+        verifyExpectations(NORMAL, events, new int[]{50, 40, 50});
+        verifyExpectations(SPORT, events, new int[]{55, 50, 55});
+        verifyExpectations(SAFE, events, new int[]{45, 30, 45});
+    }
 
+    @Test
+    public void weatherEventsCauseSpeedChanges() {
+        SensorEvent[] events = {
+            create(SPEED_LIMIT_SIGN, limit(50)),
+            createSimple(WEATHER_RAINY),
+            createSimple(WEATHER_CLEAR)
+        };
+        verifyExpectations(NORMAL, events, new int[]{50, 45, 50});
+        verifyExpectations(SPORT, events, new int[]{55, 50, 55});
+        verifyExpectations(SAFE, events, new int[]{45, 40, 45});
     }
 
     @Test
@@ -45,6 +62,12 @@ public class WhenSelfDriverIsStarted {
 
     @Test
     public void executesSuccessScenario() {
+        final SensorEvent[] events = {
+            create(SPEED_LIMIT_SIGN, limit(50)),
+            createSimple(TRAFFIC),
+            createSimple(TRAFFIC_CLEAR)
+        };
+        verifyExpectations(NORMAL, events, new int[]{50, 40, 50});
         Expectation[] expectations = new Expectation[]{
             expect(create(SPEED_LIMIT_SIGN, limit(50)), 50),
             expect(createSimple(TRAFFIC), 40),
@@ -68,8 +91,7 @@ public class WhenSelfDriverIsStarted {
 
     /**
      * This test is ignored because the upper bound on speed limits
-     * is enforced by the SpeedLimit class: the limit can't be specified.
-     *
+     * is enforced by the SpeedLimit class: the limit of 200 can't be specified.
      */
     @Test
     @Disabled
@@ -95,6 +117,19 @@ public class WhenSelfDriverIsStarted {
                     " but it was " + sd.speed());
             }
         }
+    }
+
+    private void verifyExpectations(DriveMode mode, SensorEvent[] events,
+                                    int[] expectedSpeeds) {
+        if (events.length != expectedSpeeds.length) {
+            fail("Really? Different lengths?");
+        }
+        Expectation[] expectations = IntStream
+            .range(0, events.length)
+            .mapToObj(i -> new Expectation(events[i], expectedSpeeds[i]))
+            .collect(Collectors.toList())
+            .toArray(new Expectation[0]);
+        verifyExpectations(mode, expectations);
     }
 
     private void verifyFinalSpeed(

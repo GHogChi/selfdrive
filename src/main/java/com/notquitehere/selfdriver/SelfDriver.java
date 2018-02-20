@@ -59,6 +59,8 @@ public class SelfDriver {
             forceFit(Math.max(state.speed + delta, MIN_SPEED)));
     }
 
+    public DriveMode mode() { return state.mode; }
+
     public int speed() {
         return state.speed;
     }
@@ -74,8 +76,13 @@ public class SelfDriver {
         actionsByType = new HashMap<>();
         actionsByType.put(TRAFFIC, SelfDriver::handleTraffic);
         actionsByType.put(TRAFFIC_CLEAR, SelfDriver::handleTrafficClear);
-        actionsByType.put(SPEED_LIMIT_SIGN, SelfDriver::handleSpeedLimit);
+        actionsByType.put(WEATHER_RAINY, SelfDriver::handleWeatherRainy);
+        actionsByType.put(WEATHER_CLEAR, SelfDriver::handleWeatherClear);
+        actionsByType.put(SLIPPERY_ROAD, SelfDriver::handleSlipperyRoad);
+        actionsByType.put(SLIPPERY_ROAD_CLEAR,
+            SelfDriver::handleSlipperyRoadClear);
         actionsByType.put(EMERGENCY_TURBO, SelfDriver::handleTurbo);
+        actionsByType.put(SPEED_LIMIT_SIGN, SelfDriver::handleSpeedLimit);
 
     }
 
@@ -101,16 +108,38 @@ public class SelfDriver {
         return success();
     }
 
-    private static Result<Void> handleSpeedLimit(SelfDriver sd, SensorEvent e) {
-        int limit = ((SpeedLimit) e.parameter).limit;
-        sd.setSpeed(limit + getDelta(sd, SPEED_LIMIT_SIGN));
+    private static Result<Void> handleWeatherRainy(SelfDriver sd,
+                                                   SensorEvent e) {
+        sd.adjustSpeed(getDelta(sd, WEATHER_RAINY));
         return success();
+    }
+
+    private static Result<Void> handleWeatherClear(SelfDriver sd,
+                                                   SensorEvent e) {
+        sd.adjustSpeed(getDelta(sd, WEATHER_CLEAR));
+        return success();
+    }
+
+    private static Result<Void> handleSlipperyRoad(SelfDriver sd,
+                                                   SensorEvent e) {
+        return null;
+    }
+
+    private static Result<Void> handleSlipperyRoadClear(SelfDriver sd,
+                                                        SensorEvent e) {
+        return null;
     }
 
     private static Result<Void> handleTurbo(SelfDriver sd, SensorEvent e) {
         if (sd.turboUseCount() == 0) {
             sd.startTurbo(getDelta(sd, EMERGENCY_TURBO));
         }
+        return success();
+    }
+
+    private static Result<Void> handleSpeedLimit(SelfDriver sd, SensorEvent e) {
+        int limit = ((SpeedLimit) e.parameter).limit;
+        sd.setSpeed(limit + getDelta(sd, SPEED_LIMIT_SIGN));
         return success();
     }
 
