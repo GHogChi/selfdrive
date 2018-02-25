@@ -1,15 +1,15 @@
 package com.notquitehere.selfdriver.support;
 
-import com.notquitehere.selfdriver.domain.SelfDriver;
-import com.notquitehere.selfdriver.domain.SensorEvent;
-import com.notquitehere.selfdriver.domain.DriveMode;
-import com.notquitehere.selfdriver.domain.SensorType;
+import com.notquitehere.selfdriver.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static com.notquitehere.selfdriver.domain.SensorEvent.simpleEvent;
 import static com.notquitehere.selfdriver.domain.SensorType.*;
+import static com.notquitehere.selfdriver.support.Diagnostics.dump;
 import static com.notquitehere.selfdriver.support.Result.failure;
 import static com.notquitehere.selfdriver.support.Result.success;
 import static java.text.MessageFormat.format;
@@ -80,7 +80,7 @@ public class DefaultInputAdapter implements InputAdapter {
         int id = Integer.parseInt(eventId);
         SensorType sensorType = typeForCode(id);
         if (sensorType == NOT_A_VALID_TYPE) {
-            return failure("Not a valid event type");
+            return failure("INVALID");
         }
         SensorEvent event =
             (sensorType == SPEED_LIMIT_SIGN)
@@ -99,6 +99,25 @@ public class DefaultInputAdapter implements InputAdapter {
     @Override
     public String modeName() {
         return selfDriver.mode().name();
+    }
+
+    @Override
+    public String[] usage() {
+        List<String> lines = new ArrayList<>();
+        for (int i = getMinId(); i <= getMaxId(); ++i){
+            if (i == NOT_A_VALID_TYPE.id) continue;
+            if (i != SPEED_LIMIT_SIGN.id) {
+                final String name = typeForCode(i).name;
+                lines.add(String.format("%3d: %s", i, name));
+            } else {
+                lines.add(String.format(
+                    "%3d to %d: SPEED_LIMIT_SIGN",
+                    SpeedLimit.LOWER_BOUND,
+                    SpeedLimit.UPPER_BOUND
+                ));
+            }
+        }
+        return lines.toArray(new String[0]);
     }
 
     private Result<Integer> handle(SensorEvent event) {

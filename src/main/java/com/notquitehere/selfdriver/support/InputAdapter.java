@@ -14,4 +14,6 @@ public interface InputAdapter {
     Result<String> handleInput(String eventId);
 
     String modeName();
+
+    String[] usage();
 }

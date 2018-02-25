@@ -1,5 +1,8 @@
 package com.notquitehere.selfdriver.support;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.notquitehere.selfdriver.support.Result.failure;
 import static com.notquitehere.selfdriver.support.Result.success;
 
@@ -16,12 +19,15 @@ import static com.notquitehere.selfdriver.support.Result.success;
 public class CommandLine {
     private final InputAdapter adapter;
     private final CliPort port;
+    private static final List<String> helpKeys =
+        Arrays.asList("help", "?", "-h", "--help");
+
 
     CommandLine(CliPort port, InputAdapter adapter) {
         this.port = port;
         this.adapter = adapter;
         port.tell("Welcome. Driving mode is %s", adapter.modeName());
-        port.tell(""+adapter.speed());
+        port.tell("" + adapter.speed());
     }
 
     public static void main(String[] args) {
@@ -35,8 +41,13 @@ public class CommandLine {
             do {
                 Result<String> inputResult = port.ask("Enter event: ");
                 if (inputResult.succeeded()) {
+                    final String input = inputResult.getOutput();
+                    if (helpKeys.contains(input.toLowerCase())) {
+                        displayUsage();
+                        continue;
+                    }
                     Result<String> handlerResult =
-                        adapter.handleInput(inputResult.getOutput());
+                        adapter.handleInput(input);
                     if (handlerResult.succeeded()) {
                         final String output = handlerResult.getOutput();
                         port.tell(output);
@@ -51,6 +62,13 @@ public class CommandLine {
             return failure(errorMsg);
         }
         return success();
+    }
+
+    private void displayUsage() {
+        String[] usage = adapter.usage();
+        for (String line : usage) {
+            port.tell(line);
+        }
     }
 
     private static CliPort createCliPort() {
