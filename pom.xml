@@ -11,6 +11,7 @@
         <javaLanguage.version>1.8</javaLanguage.version>
     </properties>
     <build>
+        <finalName>autonomousDriving</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -28,13 +29,34 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.notquitehere.selfdriver.CommandLine
+                            <mainClass>com.notquitehere.selfdriver.support.CommandLine
                             </mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-        </plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <!-- put your configurations here -->
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.notquitehere.selfdriver.support.CommandLine
+                            </mainClass>
+                        </manifest>
+                    </archive>                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>       </plugins>
     </build>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
