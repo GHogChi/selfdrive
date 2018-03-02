@@ -1,10 +1,10 @@
 #Self-driving Automotive System
 
 ##Execution
-Maven builds **autonomousDriving.jar** which is executable. 
+Maven builds **selfDrive.jar** which is executable. 
 
 The bash script **build.sh** will build the jar and make it runnable under 
-the name **autonomousDriving**. It requires:
+the name **selfDrive**. It requires:
 1. *nix OS.
 2. Write permission on the **target** directory.
 2. Maven executable.
@@ -92,40 +92,7 @@ Support code coverage is lower, primarily because some support classes are
 copied from my personal codebases, where they are well tested. If I had 
 provided them in an external jar, there would be no issue.
 
-### Interpreting Requirements
-In the **Requirements** section of the document *HERE Technologies - Coding 
-Exercise.pdf*, the strings "cannot fall below" and "cannot be applied"
-suggest that the response to the events in question should be
-1. do nothing
-2. return the current speed
-
-Only in the case of a sensor event code greater than 100 should the response 
-be **INVALID** rather than the current speed.  
-###Speeding?
-According to the requirements, a valid Speed Limit Sign sensor event should
-cause the speed to be raised to the value indicated
-for the drive mode. The value for SPORT mode
-is "X+5". which appears to mean that the system is
-being told to drive five miles above the limit. 
-This is the way it was implemented, because no other
-interpretation springs to mind.
-
-###Emergency Turbo
-The requirement "9. A New Speed Limit Sign clears Emergency Turbo."
-appears to mean (vacuously) that a lower speed limit "overrides
-turbo" simply by virtue of setting the speed. This is the only option
-provided for "clearing" turbo.
-
-Something feels wrong about this: an "emergency" should be a specific
-event like encountering an obstacle on a one-lane road and passing it
-in the oncoming traffic lane, and there should be a corresponding
-"clear" event. 
-
-###Graceful Stop
-There should be an explicit stop event - I almost added one in the empty 8 
-slot. How about **PARK**?
-
-##Comments on Process and the Coding Exercise
+##Comments on Process 
 I really enjoyed this exercise because it gave me a chance to try out some 
 ideas I've had about the development process. They work!
 
@@ -145,5 +112,3 @@ were passed.
 The resulting simplicity (I deleted half the methods and lines) and increased 
 clarity of the code was - like wow!
 
-So whether or not I end up at HERE (I have some reservations based on 
-history), this exercise has been a really great experience.

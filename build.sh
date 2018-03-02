@@ -1,6 +1,6 @@
 #!/bin/bash
 mvn verify
-rm -f autonomousDriving
-mv target/autonomousDriving.jar autonomousDriving
-chmod a+rx autonomousDriving
+rm -f selfDrive
+mv target/selfDrive.jar selfDrive
+chmod a+rx selfDrive
 
