@@ -13,7 +13,7 @@ This will probably work on **OSX** but if you're running **Windows**, you'll
 have to find a different way to set it up.
 
 ##Abstract Hexagonal Architecture
-**CliPort** and **InputAdapter**, used in the **CommandLine** CLI are 
+**CliPort** and **DefaultInputAdapter**, used in the **CommandLine** CLI, are 
 instantiations of refined abstractions of the ports and adapters discussed in 
 [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture).
 I call this elaboration **AHA** (Abstract Hexagonal Architecture).
