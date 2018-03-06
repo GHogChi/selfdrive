@@ -1,6 +1,6 @@
-#Self-driving Automotive System
+# Self-driving Automotive System
 
-##Execution
+## Execution
 Maven builds **selfDrive.jar** which is executable. 
 
 The bash script **build.sh** will build the jar and make it runnable under 
@@ -12,7 +12,7 @@ the name **selfDrive**. It requires:
 This will probably work on **OSX** but if you're running **Windows**, you'll 
 have to find a different way to set it up.
 
-##Abstract Hexagonal Architecture
+## Abstract Hexagonal Architecture
 **CliPort** and **DefaultInputAdapter**, used in the **CommandLine** CLI, are 
 instantiations of refined abstractions of the ports and adapters discussed in 
 [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture).
@@ -34,12 +34,12 @@ objects
   [monad](https://en.wikipedia.org/wiki/Monad_(functional_programming))-like 
   uni- or bidirectional pipeline.
 
-##OOFP and Java
+## OOFP and Java
 Object Oriented Functional Programming (OOFP) is my term for the combination 
 of the best practices of OOP and FP. Practicing OOFP using Java requires that
  we mitigate two of the biggest mistakes in Java: exceptions and nulls.
  
-###Results Instead of Exceptions
+### Results Instead of Exceptions
 See the **Result** class for an example of returning failure information 
 without using exceptions. It is similar to the Java 8 **Optional** class, but
  specialized for function returns.
@@ -49,7 +49,7 @@ without using exceptions. It is similar to the Java 8 **Optional** class, but
  constructors as examples of OOFP in several classes - e.g., 
  **DefaultInputAdapter**.
  
- ###Specialized Instances Instead of Nulls
+ ### Specialized Instances Instead of Nulls
  In a few cases I have added static instances of enums and other flyweights 
  to represent unspecified/unset/unknown/invalid values. See for example 
  **SensorType.NOT_A_VALID_TYPE**. 
@@ -59,8 +59,8 @@ without using exceptions. It is similar to the Java 8 **Optional** class, but
  
  
  
-##Extensibility
-###New Events
+## Extensibility
+### New Events
 Adding new events would be relatively straightforward and linear (i.e., 
 coding effort would be O(n)):
 
@@ -70,7 +70,7 @@ coding effort would be O(n)):
 **SelfDriver** is already a big class and should be refactored to put event 
 handlers in separate classes.
 
-###New Driving Modes
+### New Driving Modes
 This becomes a [double dispatch](https://en.wikipedia.org/wiki/Double_dispatch) 
 problem and would require a more radical 
 refactoring of test classes and mode configuration maps, but not 
@@ -84,15 +84,15 @@ A simple change for tests would be to dynamically build expectations from the
  Better yet - inject the maps. Tests can then define or randomly generate 
  simple mock maps to isolate specific functionalities. 
 
-##Issues
-###Code Coverage
+## Issues
+### Code Coverage
 Domain code coverage is over 90%. 
 
 Support code coverage is lower, primarily because some support classes are 
 copied from my personal codebases, where they are well tested. If I had 
 provided them in an external jar, there would be no issue.
 
-##Comments on Process 
+## Comments on Process 
 I really enjoyed this exercise because it gave me a chance to try out some 
 ideas I've had about the development process. They work!
 
