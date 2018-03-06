@@ -8,7 +8,7 @@
     <artifactId>selfDrive</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
-        <javaLanguage.version>1.8</javaLanguage.version>
+        <javaLanguage.version>1.9</javaLanguage.version>
     </properties>
     <build>
         <finalName>selfDrive</finalName>

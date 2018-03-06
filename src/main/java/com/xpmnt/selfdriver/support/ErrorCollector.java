@@ -1,10 +1,7 @@
 package com.xpmnt.selfdriver.support;
 
-
-
-import com.sun.javafx.UnmodifiableArrayList;
-
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,8 +24,7 @@ public class ErrorCollector implements Serializable {
     private Severity maxSeverity = OKAY;
 
     public List<ErrorWithSeverity> getErrors() {
-        return new UnmodifiableArrayList<>(
-                (ErrorWithSeverity[]) errors.toArray(), count());
+        return Collections.unmodifiableList(errors);
     }
 
     public ErrorCollector add(String error, Severity severity) {
